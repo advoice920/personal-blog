@@ -470,77 +470,44 @@ export const getTravelData = async (params = {}) => {
   }
 }
 export const getPhotoData = async (params = {}) => {
-  const categories = [
-    '动物', '黑白', '城市风光', '时尚', '极简抽象', '植物', '微距', 
-    '肖像', '舞台演出', '静物（美食）', '水下', '建筑', '自然风光', '人文纪实', '航拍', '夜景'
-  ];
-  
-  const subjects = {
-    '动物': ['威风的狮子', '野生大象', '可爱的小猫', '奔跑的猎豹', '深海鲸鱼', '飞翔的翠鸟'],
-    '自然风光': ['瑞士雪山', '冰岛极光', '秋天的新疆', '喀纳斯湖', '黄石国家公园', '森林日出'],
-    '城市风光': ['赛博朋克东京', '曼哈顿夜景', '重庆洪崖洞', '上海陆家嘴', '巴黎铁塔', '香港街头'],
-    '建筑': ['欧洲古堡', '现代极简建筑', '哥特式教堂', '苏州园林', '几何建筑', '国家大剧院'],
-    '人文纪实': ['藏族老人', '菜市场烟火气', '打铁匠', '街头艺人', '传统手工艺', '节日游行'],
-    '夜景': ['星空银河', '城市车水马龙', '萤火虫之森', '霓虹灯牌', '雪夜', '江边夜景'],
-    '航拍': ['上帝视角海岸线', '沙漠绿洲航拍', '立交桥航拍', '梯田航拍', '海岛航拍', '雪山顶峰航拍'],
-    '肖像': ['老爷爷肖像', '少女写真', '儿童笑脸', '时尚模特', '眼神特写', '黑白人像'],
-    '极简抽象': ['水面波纹', '光影极简', '几何线条', '沙丘曲线', '纯色背景', '建筑局部'],
-    '微距': ['昆虫复眼', '露水微距', '雪花微距', '花蕊特写', '树叶脉络', '蝴蝶翅膀'],
-    '植物': ['热带雨林', '枯树枝', '盛开的玫瑰', '仙人掌', '秋日红叶', '苔藓'],
-    '黑白': ['黑白街拍', '黑白风景', '黑白光影', '黑白人像', '黑白建筑', '黑白剪影'],
-    '舞台演出': ['摇滚现场', '芭蕾舞', '交响乐团', '话剧舞台', '演唱会灯光', '街舞抓拍'],
-    '静物（美食）': ['咖啡与书', '复古相机', '插花艺术', '高级法餐摆盘', '玻璃器皿光影', '阳光下的水果'],
-    '水下': ['绚丽珊瑚礁', '潜水员与海龟', '深海鱼群风暴', '水下唯美人像', '沉船探险', '彩色海兔微距'],
-    '时尚': ['时装周T台走秀', '街拍高级穿搭', '时尚杂志封面拍摄', '复古胶片穿搭', '首饰特写', '高级定制礼服']
-  };
-
-  const totalPhotos = 120; // Generate 120 static items so pagination has 10 pages of 12
-  
-  // Deterministic generation so pagination is stable across requests
-  const allPhotos = [];
-  for (let i = 0; i < totalPhotos; i++) {
-    const catIndex = i % categories.length;
-    const category = categories[catIndex];
-    const subjectList = subjects[category] || ['绝美风景'];
-    const subject = subjectList[i % subjectList.length];
-    
-    // Randomize dimensions to make justified grid layout look dynamic and professional
-    const width = 800;
-    const heights = [533, 600, 800, 1000, 1200]; // corresponding to 3:2, 4:3, 1:1, 4:5, 2:3
-    const height = heights[(i * 7) % heights.length];
-    
-    const title = `${subject} 摄影大片`;
-    const imgUrl = `https://tse2-mm.cn.bing.net/th?q=${encodeURIComponent(title + ' 高清单反 壁纸')}&w=${width}&h=${height}&c=7&rs=1&p=0&dpr=1&pid=1.7&mkt=zh-CN&adlt=moderate`;
-    
-    // Avatar URL deterministically based on category
-    const avatarUrl = `https://tse2-mm.cn.bing.net/th?q=${encodeURIComponent('时尚摄影师 头像 ' + category)}&w=100&h=100&c=7&rs=1&p=0&dpr=1&pid=1.7&mkt=zh-CN`;
-
-    allPhotos.push({
-      id: `photo_${i}`,
-      url: imgUrl,
-      title: title,
-      category: category,
-      author: 'Bing摄想家',
-      avatar: avatarUrl,
-      views: 1000 + (i * 13) % 9000,
-      likes: 100 + (i * 7) % 900,
-      width: width,
-      height: height
-    });
-  }
-
-  // Shuffle array using a deterministic seed so it looks random but pagination stays intact
-  // (We'll just leave it ordered to ensure every page has mixed categories since we iterate categories)
-
   const page = params.page || 1;
   const limit = params.limit || 12;
-  const startIndex = (page - 1) * limit;
-  const pagedPhotos = allPhotos.slice(startIndex, startIndex + limit);
+  const category = params.category || '';
 
-  if (params.page) {
-    return { items: pagedPhotos, total: totalPhotos };
+  // 从后端获取照片（数据库 + Bing 实时搜索）
+  try {
+    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const queryParams = { page, limit };
+    if (category && category !== '全部') queryParams.category = category;
+
+    const response = await axios.get(`${baseUrl}/photos`, {
+      params: queryParams,
+      timeout: 12000,
+    });
+
+    const respData = response.data?.data || response.data;
+    if (respData && respData.items && respData.items.length > 0) {
+      const items = respData.items.map(p => ({
+        id: String(p.id || `photo_${Math.random()}`),
+        url: p.url || p.thumb || '',
+        title: p.title || '',
+        category: p.category || '未分类',
+        author: p.author || 'Bing图库',
+        avatar: p.avatar || '',
+        views: p.views || 0,
+        likes: p.likes || 0,
+        width: p.width || 800,
+        height: p.height || 600,
+      }));
+
+      return { items, total: respData.total || items.length };
+    }
+
+    throw new Error('Empty result');
+  } catch (error) {
+    console.warn('[Photo] Backend fetch failed, using fallback:', error.message);
+    return { items: [], total: 0 };
   }
-  return pagedPhotos;
 }
 export const getReadingData = async (params = {}) => {
   if (true) return await fetchWithFallback('/reading', 'reading', ['tags'], params);
@@ -755,146 +722,52 @@ const doubanPosters = {
 
 export const getMovieData = async (params = {}) => {
   const page = params.page || 1;
-  const category = params.category || '科幻';
-  const apiKey = '123068646a36df8764e6205eaa2b67a5';
-
-  const genreMap = {
-    '科幻': 878, '剧情': 18, '动作': 28, '喜剧': 35, '悬疑': 9648, '爱情': 10749
-  };
-  const genreId = genreMap[category] || 878;
+  const limit = params.limit || 12;
+  const category = params.category || '全部';
 
   try {
-    if (!apiHealth.movie) throw new Error('Fast fail TMDB');
-    // 1. 获取电影列表
-    const url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=zh-CN&page=${page}&with_genres=${genreId}&sort_by=popularity.desc`;
-    const response = await axios.get(url, { timeout: 3000 });
-
-    if (response.data && response.data.results) {
-      const movieList = response.data.results;
-
-      // 2. 批量获取每部电影的详细信息（简介 + 演职员）
-      const enrichedMovies = await Promise.all(
-        movieList.slice(0, 12).map(async (item) => {
-          try {
-            const [detailRes, creditRes] = await Promise.all([
-              axios.get(`https://api.themoviedb.org/3/movie/${item.id}?api_key=${apiKey}&language=zh-CN`, { timeout: 2000 }),
-              axios.get(`https://api.themoviedb.org/3/movie/${item.id}/credits?api_key=${apiKey}&language=zh-CN`, { timeout: 2000 })
-            ]);
-
-            const detail = detailRes.data || {};
-            const credit = creditRes.data || {};
-
-            // 导演
-            const directors = (credit.crew || [])
-              .filter(c => c.job === 'Director')
-              .map(c => c.name);
-
-            // 主演（前6位）
-            const actors = (credit.cast || [])
-              .slice(0, 6)
-              .map(c => ({ name: c.name, character: c.character, avatar: c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : null }));
-
-            const posterUrl = item.poster_path
-              ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-              : `https://tse2-mm.cn.bing.net/th?q=${encodeURIComponent(item.title + ' 电影海报')}&w=400&h=600&c=7&rs=1&p=0&dpr=1&pid=1.7&mkt=zh-CN`;
-
-            return {
-              id: item.id.toString(),
-              title: item.title,
-              originalTitle: item.original_title,
-              cover: posterUrl,
-              thumbnail: posterUrl,
-              rating: item.vote_average ? item.vote_average.toFixed(1) : '暂无',
-              synopsis: item.overview || detail.overview || '暂无简介',
-              year: (item.release_date || detail.release_date || '').substring(0, 4),
-              runtime: detail.runtime ? `${detail.runtime} 分钟` : '',
-              genres: (detail.genres || []).map(g => g.name),
-              director: directors.length > 0 ? directors.join('、') : '未知',
-              actors: actors,
-              voteCount: item.vote_count,
-              tagline: detail.tagline || '',
-            };
-          } catch (e) {
-            // 如果详情获取失败，返回基础数据
-            const posterUrl = item.poster_path
-              ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-              : `https://tse2-mm.cn.bing.net/th?q=${encodeURIComponent(item.title + ' 电影海报')}&w=400&h=600&c=7&rs=1&p=0&dpr=1&pid=1.7&mkt=zh-CN`;
-            return {
-              id: item.id.toString(),
-              title: item.title,
-              originalTitle: item.original_title,
-              cover: posterUrl, thumbnail: posterUrl,
-              rating: item.vote_average ? item.vote_average.toFixed(1) : '暂无',
-              synopsis: item.overview || '暂无简介',
-              year: (item.release_date || '').substring(0, 4),
-              runtime: '', genres: [category],
-              director: '未知', actors: [],
-              voteCount: item.vote_count,
-            };
-          }
-        })
-      );
-
-      if (params.page) {
-        const total = Math.min(response.data.total_results, 10000);
-        return { items: enrichedMovies, total: total };
-      }
-      return enrichedMovies;
-    }
-  } catch (error) {
-    markApiFailed('movie');
-    console.warn('[TMDB API] Connection failed, falling back to local library...', error.message);
-  }
-
-  // --- 智能回退方案：AI 自动生成的海量精美本地影库 (防止 TMDB 被墙) ---
-  const seedTitles = {
-    '科幻': ['星际穿越', '流浪地球', '骇客帝国', '阿凡达', '沙丘', '银翼杀手', '盗梦空间', '异形', '黑客帝国', '头号玩家'],
-    '剧情': ['肖申克的救赎', '阿甘正传', '楚门的世界', '霸王别姬', '当幸福来敲门', '绿皮书', '辛德勒的名单', '活着'],
-    '动作': ['复仇者联盟', '碟中谍', '速度与激情', '007', '黑客帝国', '叶问', '战狼', '杀破狼'],
-    '喜剧': ['大话西游', '疯狂动物城', '唐人街探案', '西虹市首富', '三傻大闹宝莱坞', '触不可及', '泰囧'],
-    '悬疑': ['无间道', '唐人街探案', '看不见的客人', '蝴蝶效应', '禁闭岛', '嫌疑人X的献身', '七宗罪', '心迷宫'],
-    '爱情': ['泰坦尼克号', '怦然心动', '你的名字', '情书', '爱在黎明破晓前', '罗马假日', '诺丁山', '初恋这件小事']
-  };
-
-  const currentSeeds = seedTitles[category] || seedTitles['科幻'];
-  const totalFallbackItems = 1200; // 提供 100 页数据 (12*100) 以满足"大量数据"的需求
-  
-  const startIndex = (page - 1) * 12;
-  const pagedItems = [];
-  
-  for (let i = startIndex; i < startIndex + 12; i++) {
-    const seed = currentSeeds[i % currentSeeds.length];
-    // 根据 i 添加一点变化后缀，产生海量看似不同的数据
-    const suffix = i < currentSeeds.length ? '' : ` (系列 ${Math.floor(i/currentSeeds.length) + 1})`;
-    const title = seed + suffix;
-    
-    let cover = doubanPosters[seed];
-    if (!cover) {
-      cover = `https://tse2-mm.cn.bing.net/th?q=${encodeURIComponent(seed + ' 电影 高清海报')}&w=400&h=600&c=7&rs=1&p=0&dpr=1&pid=1.7&mkt=zh-CN`;
-    }
-
-    pagedItems.push({
-      id: 'movie_ai_' + i,
-      title: title,
-      originalTitle: title,
-      cover: cover, thumbnail: cover,
-      rating: ((Math.random() * 2) + 7.8).toFixed(1),
-      synopsis: `一部极具代表性的${category}佳作，引人入胜的剧情与震撼的视听体验。`,
-      year: '2024', runtime: `${Math.floor(Math.random() * 60) + 90} 分钟`,
-      genres: [category], director: '知名导演',
-      actors: [
-        { name: '主演A', character: '角色A', avatar: null },
-        { name: '主演B', character: '角色B', avatar: null },
-        { name: '主演C', character: '角色C', avatar: null },
-      ],
-      voteCount: Math.floor(Math.random() * 50000) + 1000,
+    // 从后端数据库获取豆瓣电影数据
+    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const response = await axios.get(`${baseUrl}/movie`, {
+      params: { page, limit, sort: 'id', order: 'desc' },
+      timeout: 5000,
     });
+
+    // 响应格式: { code: 200, data: { items: [...], total: N } }
+    const respData = response.data?.data || response.data;
+    if (respData && respData.items) {
+      const items = respData.items.map(m => ({
+        id: String(m.id),
+        title: m.title,
+        originalTitle: m.titleEn || m.title,
+        // 用 Bing 搜索电影海报
+        cover: `https://tse2-mm.cn.bing.net/th?q=${encodeURIComponent(m.title + ' 电影海报')}&w=400&h=600&c=7&rs=1&p=0&dpr=1&pid=1.7&mkt=zh-CN`,
+        thumbnail: m.cover,
+        rating: m.rating ? Number(m.rating).toFixed(1) : '暂无',
+        synopsis: m.desc || '暂无简介',
+        year: m.year || '',
+        runtime: m.runtime || '',
+        genres: m.tags ? (Array.isArray(m.tags) ? m.tags : JSON.parse(m.tags || '[]')) : [],
+        director: m.director || '未知',
+        actors: m.actors || [],
+        voteCount: m.voteCount || 0,
+        tagline: m.quote || '',
+      }));
+
+      // 豆瓣列表页不提供分类信息，直接返回全部，前端按评分排序展示
+      return {
+        items,
+        total: respData.total || items.length,
+      };
+    }
+
+    throw new Error('Invalid response');
+  } catch (error) {
+    console.warn('[Movie API] Backend fetch failed, using static data:', error.message);
   }
 
-  if (params.page) {
-    return { items: pagedItems, total: totalFallbackItems };
-  }
-  return pagedItems;
+  // 最终降级：返回空列表（让用户知道暂无数据）
+  return { items: [], total: 0 };
 }
 export const getSportsData = async () => {
   return [

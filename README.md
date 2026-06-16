@@ -44,7 +44,7 @@ cd frontend && npm run dev   # 前端 → http://localhost:5173
 - **有 MySQL**：在 `.env` 里配好密码，自动连 MySQL
 - **没 MySQL**：自动使用 `frontend/public/mock.sqlite`，零配置直接跑
 
-管理员账号：`2518119419@qq.com` / `Qazwsx123`
+管理员账号：`2518119419@qq.com` / `123456`
 
 ## 推 Gitee 前
 

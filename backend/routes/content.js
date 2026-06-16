@@ -4,7 +4,7 @@ const contentController = require('../controllers/contentController');
 // const { verifyToken, isAdmin } = require('../middleware/authMiddleware'); 
 // Will uncomment auth middleware after implementing it
 
-const modules = ['articles', 'food', 'travel', 'photo', 'reading', 'music', 'reviews', 'fashion', 'sports'];
+const modules = ['articles', 'food', 'travel', 'photo', 'reading', 'music', 'reviews', 'fashion', 'sports', 'movie'];
 
 modules.forEach(mod => {
   const capMod = mod.charAt(0).toUpperCase() + mod.slice(1);

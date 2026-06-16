@@ -19,6 +19,12 @@ const DEFAULT_FEEDS = [
     name: '36氪',
     url: 'https://www.36kr.com/feed',
     type: 'rss',
+    minContentLen: 500, // 过滤掉短快讯
+  },
+  {
+    name: '知乎每日精选',
+    url: 'https://www.zhihu.com/rss',
+    type: 'rss',
   },
 ];
 
@@ -42,7 +48,7 @@ function clean(s) {
  */
 function stripHtml(html) {
   if (!html) return '';
-  return html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().substring(0, 300);
+  return html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 }
 
 /**
@@ -121,6 +127,29 @@ async function fetchFullContent(url) {
 
     // Remove unwanted elements
     $('script, style, nav, footer, header, aside, .sidebar, .comment, .ad, .advertisement, .recommend, .related, .share, .social, .copyright, [class*="banner"], [class*="menu"], [class*="footer"], [class*="header"], [class*="sidebar"], [class*="comment"], [class*="recommend"], [class*="related"], iframe').remove();
+
+    // 36kr special handling — extract JSON-embedded content
+    let jsonContent = '';
+    $('script').each((i, el) => {
+      const text = $(el).html() || '';
+      if (text.includes('newsflashDetail') || text.includes('articleDetail')) {
+        try {
+          // Match window.initialState={...}
+          const match = text.match(/window\.initialState\s*=\s*(\{.*?"newsflashDetail"|\{.*?"articleDetail").*?\}\}\}\}\};?\s*$/s)
+            || text.match(/window\.initialState\s*=\s*(\{.*\})\s*;?\s*$/s);
+          if (match) {
+            const data = JSON.parse(match[1]);
+            const detail = data.newsflashDetail || data.articleDetail || {};
+            const detailData = (detail.detailData || detail).data || detail;
+            if (detailData.widgetContent) jsonContent = '<p>' + detailData.widgetContent + '</p>';
+            if (detailData.widgetTitle) jsonContent = '<h1>' + detailData.widgetTitle + '</h1>' + jsonContent;
+          }
+        } catch(e) { /* ignore parse errors */ }
+      }
+    });
+    if (jsonContent) {
+      return jsonContent.substring(0, 100000);
+    }
 
     // Try common article content selectors
     const selectors = [
@@ -215,6 +244,15 @@ async function fetchAllAndSave() {
             articleContent = fullContent || entry.summary;
           }
 
+          // Filter out short content if feed has minContentLen
+          if (feed.minContentLen) {
+            const contentText = stripHtml(articleContent);
+            if (contentText.length < feed.minContentLen) {
+              console.log(`[RSS] Skipping short article (${contentText.length} chars): ${entry.title.substring(0, 40)}`);
+              continue;
+            }
+          }
+
           await db.query(
             `INSERT INTO articles (title, summary, content, thumbnail, author_name, author_avatar, link, source, tags, views, likes, category, createdAt)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -257,7 +295,7 @@ async function getRssArticles(page = 1, limit = 25, mineOnly = false) {
     where += " AND (source IS NULL OR source = '')";
   }
   const [rows] = await db.query(
-    `SELECT * FROM articles WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+    `SELECT * FROM articles WHERE ${where} ORDER BY id DESC LIMIT ? OFFSET ?`,
     [limit, offset]
   );
   const [[{ total }]] = await db.query(

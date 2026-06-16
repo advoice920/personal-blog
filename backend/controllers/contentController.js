@@ -188,7 +188,7 @@ const deleteItem = async (tableName, req, res) => {
 };
 
 // Expose handlers for each module
-const modules = ['articles', 'food', 'travel', 'photo', 'reading', 'music', 'reviews', 'fashion', 'sports'];
+const modules = ['articles', 'food', 'travel', 'photo', 'reading', 'music', 'reviews', 'fashion', 'sports', 'movie'];
 
 const exportsObj = {};
 modules.forEach(mod => {

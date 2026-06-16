@@ -74,16 +74,22 @@ async function initDB() {
 `);
     // Add super admin
     const adminEmail = '2518119419@qq.com';
-const adminPasswordRaw = 'Qazwsx123';
+const adminPasswordRaw = '123456';
 const [existingAdmin] = await connection.query(`SELECT * FROM users WHERE email = ?`, [adminEmail]);
+const hashedPassword = await bcrypt.hash(adminPasswordRaw, 10);
 if (existingAdmin.length === 0) {
-  const hashedPassword = await bcrypt.hash(adminPasswordRaw, 10);
   // 新增 username 字段，值固定为 admin
   await connection.query(
     `INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'admin')`,
     ['admin', adminEmail, hashedPassword]
   );
   console.log('Super admin user created.');
+} else {
+  await connection.query(
+    `UPDATE users SET password = ? WHERE email = ?`,
+    [hashedPassword, adminEmail]
+  );
+  console.log('Super admin password updated.');
 }
 
     // Tables for basic content
