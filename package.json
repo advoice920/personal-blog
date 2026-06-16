@@ -1,0 +1,7 @@
+{
+  "name": "personal-blog",
+  "private": true,
+  "scripts": {
+    "push": "node backend/export_sqlite.js && git add -A && git commit -m \"update\" && git push"
+  }
+}

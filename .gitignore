@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+.vscode/
+.idea/
+.git_backup/
+.vite/
+*.png
+*.jpg
+mock.sqlite-shm
+mock.sqlite-wal
+screenshot_*
