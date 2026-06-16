@@ -2,7 +2,7 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
-const SQLITE_PATH = path.join(__dirname, '..', '..', 'frontend', 'public', 'mock.sqlite');
+const SQLITE_PATH = process.env.SQLITE_PATH || path.join(__dirname, '..', '..', 'frontend', 'public', 'mock.sqlite');
 
 let db = null;
 
