@@ -93,7 +93,10 @@ router.beforeEach((to, from, next) => {
   const publicPages = ["/login", "/register", "/forgot-password"]
   const publicPrefixes = ["/post/", "/playlist/", "/profile/"]
   const isPublicPath = publicPages.includes(to.path) || publicPrefixes.some(p => to.path.startsWith(p))
-  const loggedIn = localStorage.getItem("token") || localStorage.getItem("mockToken")
+  const loggedIn = localStorage.getItem("token")
+    || sessionStorage.getItem("token")
+    || localStorage.getItem("mockToken")
+    || sessionStorage.getItem("mockToken")
 
   console.log("[Router] isPublicPath:", isPublicPath, "loggedIn:", !!loggedIn)
 
