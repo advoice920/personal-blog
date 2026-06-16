@@ -41,7 +41,7 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(400).json({ error: 'Internal server error' });
   }
 };
 
@@ -60,7 +60,7 @@ exports.sendCode = async (req, res) => {
       }
     } catch (err) {
       console.error('Check email error:', err);
-      return res.status(500).json({ error: '服务器错误' });
+      return res.status(400).json({ error: '服务器错误' });
     }
   }
 
@@ -73,7 +73,7 @@ exports.sendCode = async (req, res) => {
       }
     } catch (err) {
       console.error('Check email error:', err);
-      return res.status(500).json({ error: '服务器错误' });
+      return res.status(400).json({ error: '服务器错误' });
     }
   }
 
@@ -89,7 +89,7 @@ exports.sendCode = async (req, res) => {
   // } else {
   //   // Clean up if failed
   //   delete verificationCodes[email];
-  //   res.status(500).json({ error: '发送失败，请检查邮箱地址或稍后再试' });
+  //   res.status(400).json({ error: '发送失败，请检查邮箱地址或稍后再试' });
   // }
   const subject = type === 'reset' ? '【LiveBlog】密码重置验证码' : '【LiveBlog】您的注册验证码';
 const success = await emailUtil.sendVerificationCode(email, code, subject);
@@ -99,7 +99,7 @@ if (success) {
   res.json({ message: '验证码发送成功' });
 } else {
   delete verificationCodes[email];
-  res.status(500).json({ error: '发送失败，请检查邮箱地址或稍后再试' });
+  res.status(400).json({ error: '发送失败，请检查邮箱地址或稍后再试' });
 }
 };
 
@@ -139,7 +139,7 @@ exports.register = async (req, res) => {
     res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(400).json({ error: 'Internal server error' });
   }
 };
 
@@ -182,6 +182,6 @@ exports.resetPassword = async (req, res) => {
     res.json({ message: '密码重置成功' });
   } catch (error) {
     console.error('Reset password error:', error);
-    res.status(500).json({ error: '服务器错误' });
+    res.status(400).json({ error: '服务器错误' });
   }
 };
