@@ -1,7 +1,10 @@
 {
   "name": "personal-blog",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "push": "node backend/export_sqlite.js && git add -A && git commit -m \"update\" && git push"
+    "postinstall": "npm install --prefix frontend && npm install --prefix backend",
+    "build": "npm run build --prefix frontend",
+    "start": "npm start --prefix backend"
   }
 }

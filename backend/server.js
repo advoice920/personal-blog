@@ -1,4 +1,4 @@
-﻿const express = require("express");
+const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
@@ -44,6 +44,19 @@ app.use("/api/photos", photoRoutes);
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "Backend is running" });
 });
+
+const path = require("path");
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
+
+// SPA fallback for non-API routes
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
+});
+
 
 app.listen(port, async () => {
   console.log(`Server listening at http://localhost:${port}`);

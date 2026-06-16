@@ -2,7 +2,7 @@ import axios from 'axios'
 import initSqlJs from 'sql.js/dist/sql-wasm-browser.js'
 import { ElMessage } from 'element-plus'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 // --- Global API Loading Indicator ---
 let loadingCount = 0;
@@ -258,7 +258,7 @@ export const getArticles = async (params = {}) => {
 
   // Primary: use RSS data from our own backend (always available, never limited)
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const response = await axios.get(`${baseUrl}/rss/articles`, {
       params: { page, limit },
       timeout: 3000
@@ -476,7 +476,7 @@ export const getPhotoData = async (params = {}) => {
 
   // 从后端获取照片（数据库 + Bing 实时搜索）
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const queryParams = { page, limit };
     if (category && category !== '全部') queryParams.category = category;
 
@@ -727,7 +727,7 @@ export const getMovieData = async (params = {}) => {
 
   try {
     // 从后端数据库获取豆瓣电影数据
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const response = await axios.get(`${baseUrl}/movie`, {
       params: { page, limit, sort: 'id', order: 'desc' },
       timeout: 5000,
@@ -879,7 +879,7 @@ export const uploadImage = async (file) => {
 
 export const login = async (username, password, rememberMe = false) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const endpoint = '/auth/login';
     const response = await axios.post(`${baseUrl}${endpoint}`, { email: username, password, rememberMe });
     return response.data;
@@ -894,7 +894,7 @@ export const login = async (username, password, rememberMe = false) => {
 
 export const sendVerificationCode = async (email, type = 'register') => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const endpoint = '/auth/send-code';
     const response = await axios.post(`${baseUrl}${endpoint}`, { email, type });
     return { code: 200, data: response.data, msg: '验证码已发送' };
@@ -909,7 +909,7 @@ export const sendVerificationCode = async (email, type = 'register') => {
 
 export const resetPassword = async (email, code, newPassword) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const endpoint = '/auth/reset-password';
     const response = await axios.post(`${baseUrl}${endpoint}`, { email, code, newPassword });
     return { code: 200, data: response.data, msg: '密码重置成功' };
@@ -924,7 +924,7 @@ export const resetPassword = async (email, code, newPassword) => {
 
 export const register = async (username, email, password, code) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const endpoint = '/auth/register';
     const response = await axios.post(`${baseUrl}${endpoint}`, { username, email, password, code });
     return { code: 200, data: response.data, msg: '注册成功' };
@@ -939,7 +939,7 @@ export const register = async (username, email, password, code) => {
 
 export const scrapeArticle = async (url) => {
   try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
     const response = await axios.get(`${baseUrl}/scrape`, { params: { url } });
     return response.data;
   } catch (error) {
@@ -951,7 +951,7 @@ export const scrapeArticle = async (url) => {
 // History APIs
 export const addHistory = async (data) => {
   try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
     const token = localStorage.getItem('token') || localStorage.getItem('mockToken');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.post(`${baseUrl}/history`, data, { headers });
@@ -964,7 +964,7 @@ export const addHistory = async (data) => {
 
 export const getHistory = async (params = { page: 1, limit: 20 }) => {
   try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
     const token = localStorage.getItem('token') || localStorage.getItem('mockToken');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.get(`${baseUrl}/history`, { params, headers });
@@ -977,7 +977,7 @@ export const getHistory = async (params = { page: 1, limit: 20 }) => {
 
 export const clearHistory = async () => {
   try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
     const token = localStorage.getItem('token') || localStorage.getItem('mockToken');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.delete(`${baseUrl}/history`, { headers });
@@ -990,7 +990,7 @@ export const clearHistory = async () => {
 
 export const deleteHistory = async (id) => {
   try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
     const token = localStorage.getItem('token') || localStorage.getItem('mockToken');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.delete(`${baseUrl}/history/${id}`, { headers });
@@ -1003,7 +1003,7 @@ export const deleteHistory = async (id) => {
 
 export const chatWithAI = async (messages, systemPrompt = '') => {
   try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
     const token = localStorage.getItem('token') || localStorage.getItem('mockToken');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.post(`${baseUrl}/ai/chat`, { messages, systemPrompt }, { headers });
@@ -1016,7 +1016,7 @@ export const chatWithAI = async (messages, systemPrompt = '') => {
 
 export const getUserProfile = async () => {
   try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
     const token = localStorage.getItem('token') || localStorage.getItem('mockToken');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.get(`${baseUrl}/users/me`, { headers });
@@ -1029,7 +1029,7 @@ export const getUserProfile = async () => {
 
 export const updateUserProfile = async (data) => {
   try {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
     const token = localStorage.getItem('token') || localStorage.getItem('mockToken');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const response = await axios.put(`${baseUrl}/users/me`, data, { headers });
@@ -1044,7 +1044,7 @@ export const updateUserProfile = async (data) => {
 
 export const searchMusic = async (keyword, limit = 10) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const response = await axios.get(`${baseUrl}/music/search`, { params: { keyword, limit } });
     return response.data.data || [];
   } catch (error) {
@@ -1055,7 +1055,7 @@ export const searchMusic = async (keyword, limit = 10) => {
 
 export const searchAndSaveMusic = async (keyword) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const response = await axios.post(`${baseUrl}/music/search-and-save`, { keyword });
     return response.data.data || null;
   } catch (error) {
@@ -1066,7 +1066,7 @@ export const searchAndSaveMusic = async (keyword) => {
 
 export const getSongUrl = async (neteaseId) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const response = await axios.get(`${baseUrl}/music/song-url/${neteaseId}`);
     return response.data.data?.url || null;
   } catch (error) {
@@ -1077,7 +1077,7 @@ export const getSongUrl = async (neteaseId) => {
 
 export const refreshSongUrl = async (neteaseId) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const response = await axios.post(`${baseUrl}/music/refresh-url/${neteaseId}`);
     return response.data.data?.url || null;
   } catch (error) {
@@ -1088,7 +1088,7 @@ export const refreshSongUrl = async (neteaseId) => {
 
 export const getSavedSongs = async (page = 1, limit = 20) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const response = await axios.get(`${baseUrl}/music/saved`, { params: { page, limit } });
     return response.data.data || { items: [], total: 0 };
   } catch (error) {
@@ -1105,7 +1105,7 @@ const getAuthHeaders = () => {
 
 export const getComments = async (module, itemId, page = 1, limit = 20) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const response = await axios.get(`${baseUrl}/interaction/comments/${module}/${itemId}`, {
       params: { page, limit },
       headers: getAuthHeaders()
@@ -1119,7 +1119,7 @@ export const getComments = async (module, itemId, page = 1, limit = 20) => {
 
 export const addComment = async (module_name, item_id, content) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const response = await axios.post(`${baseUrl}/interaction/comments`,
       { module_name, item_id, content },
       { headers: getAuthHeaders() }
@@ -1136,7 +1136,7 @@ export const addComment = async (module_name, item_id, content) => {
 
 export const deleteComment = async (commentId) => {
   try {
-    const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
+    const baseUrl = API_BASE_URL || '/api';
     const response = await axios.delete(`${baseUrl}/interaction/comments/${commentId}`, {
       headers: getAuthHeaders()
     });
