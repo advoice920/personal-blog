@@ -23,6 +23,7 @@ const musicRoutes = require("./routes/music");
 const rssRoutes = require("./routes/rss");
 const imageProxyRoutes = require("./routes/imageProxy");
 const movieReviewsRoutes = require("./routes/movieReviews");
+const photoRoutes = require("./routes/photos");
 
 app.use("/api/music", musicRoutes);
 app.use("/api", contentRoutes);
@@ -38,6 +39,7 @@ app.use("/api/tianapi", tianapiRoutes);
 app.use("/api/rss", rssRoutes);
 app.use("/api/img", imageProxyRoutes);
 app.use("/api/movie", movieReviewsRoutes);
+app.use("/api/photos", photoRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "Backend is running" });
@@ -45,6 +47,14 @@ app.get("/api/health", (req, res) => {
 
 app.listen(port, async () => {
   console.log(`Server listening at http://localhost:${port}`);
+
+  // Auto-init database tables (idempotent)
+  try {
+    const initDB = require('./init_db_auto');
+    await initDB();
+  } catch (e) {
+    console.warn('[DB] Init skip:', e.message);
+  }
 
   // Auto-fetch RSS on startup, then every 6 hours
   try {
