@@ -88,8 +88,15 @@ const router = useRouter()
 
 const searchKeyword = ref(route.query.q || '')
 
-const isLoggedIn = ref(!!localStorage.getItem('token') || !!localStorage.getItem('mockToken'))
-const userInfo = ref(JSON.parse(localStorage.getItem('userInfo') || '{}'))
+const isLoggedIn = ref(
+  !!localStorage.getItem('token') ||
+  !!sessionStorage.getItem('token') ||
+  !!localStorage.getItem('mockToken') ||
+  !!sessionStorage.getItem('mockToken')
+)
+const userInfo = ref(
+  JSON.parse(localStorage.getItem('userInfo') || sessionStorage.getItem('userInfo') || '{}')
+)
 
 const handleSearch = () => {
   if (!searchKeyword.value.trim()) return
@@ -126,8 +133,11 @@ const categories = [
 
 const handleLogout = () => {
   localStorage.removeItem('token')
+  sessionStorage.removeItem('token')
   localStorage.removeItem('mockToken')
+  sessionStorage.removeItem('mockToken')
   localStorage.removeItem('userInfo')
+  sessionStorage.removeItem('userInfo')
   isLoggedIn.value = false
   userInfo.value = {}
   router.push('/login')
