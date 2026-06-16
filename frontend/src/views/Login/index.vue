@@ -91,7 +91,7 @@ const handleLogin = async () => {
   
   loading.value = true
   try {
-    const res = await login(form.username.trim(), form.password.trim())
+    const res = await login(form.username.trim(), form.password.trim(), rememberMe.value)
     loading.value = false
     
     // API directly returns JSON { message, token, user } on success, or throws on failure.
@@ -101,8 +101,9 @@ const handleLogin = async () => {
     // Let's adapt to that:
     if (res.token) {
       ElMessage.success(res.user.role === 'admin' ? '欢迎回来，管理员！' : '登录成功')
-      localStorage.setItem('token', res.token)
-      localStorage.setItem('userInfo', JSON.stringify(res.user))
+      const storage = rememberMe.value ? localStorage : sessionStorage
+      storage.setItem('token', res.token)
+      storage.setItem('userInfo', JSON.stringify(res.user))
       router.push('/')
     } else if (res.code) {
       ElMessage.error(res.msg || '登录失败')
