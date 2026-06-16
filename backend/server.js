@@ -50,11 +50,14 @@ const path = require("path");
 app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
 
 // SPA fallback for non-API routes
-app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ error: 'API route not found' });
+app.use((req, res, next) => {
+  if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
+  } else if (req.path.startsWith('/api/')) {
+    res.status(404).json({ error: 'API route not found' });
+  } else {
+    next();
   }
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
 });
 
 
