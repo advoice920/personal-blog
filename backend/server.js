@@ -61,7 +61,7 @@ app.use((req, res, next) => {
 });
 
 
-app.listen(port, async () => {
+const startServer = async () => {
   console.log(`Server listening at http://localhost:${port}`);
 
   // Auto-init database tables (idempotent)
@@ -90,6 +90,16 @@ app.listen(port, async () => {
       console.warn('[RSS] Auto-refresh failed:', e.message);
     }
   }, 6 * 60 * 60 * 1000); // Every 6 hours
-});
+};
 
-// trigger nodemon
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(port, startServer);
+} else if (process.env.VERCEL) {
+  // Init DB on cold start for Vercel
+  try {
+    const initDB = require('./init_db_auto');
+    initDB().catch(e => console.warn('[DB] Vercel Init skip:', e.message));
+  } catch (e) {}
+}
+
+module.exports = app;
