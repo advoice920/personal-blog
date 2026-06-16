@@ -5,7 +5,7 @@
       "src": "backend/server.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["node_modules/sql.js/dist/*.wasm", "mock.sqlite"]
+        "includeFiles": ["backend/node_modules/sql.js/dist/*.wasm", "backend/mock.sqlite"]
       }
     },
     {
