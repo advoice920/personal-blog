@@ -2,7 +2,7 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
-const SQLITE_PATH = process.env.SQLITE_PATH || path.join(__dirname, '..', '..', 'frontend', 'public', 'mock.sqlite');
+const SQLITE_PATH = process.env.SQLITE_PATH || path.join(__dirname, '..', 'mock.sqlite');
 
 let db = null;
 
@@ -22,7 +22,7 @@ async function getDB() {
 }
 
 function saveDB() {
-  if (db) {
+  if (db && !process.env.VERCEL) {
     const data = db.export();
     const dir = path.dirname(SQLITE_PATH);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
