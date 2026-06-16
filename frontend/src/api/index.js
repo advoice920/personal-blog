@@ -1004,11 +1004,11 @@ export const uploadImage = async (file) => {
   return response.data;
 }
 
-export const login = async (username, password) => {
+export const login = async (username, password, rememberMe = false) => {
   try {
     const baseUrl = API_BASE_URL || 'http://localhost:3000/api';
     const endpoint = '/auth/login';
-    const response = await axios.post(`${baseUrl}${endpoint}`, { email: username, password });
+    const response = await axios.post(`${baseUrl}${endpoint}`, { email: username, password, rememberMe });
     return response.data;
   } catch (error) {
     console.error('Login error:', error);
