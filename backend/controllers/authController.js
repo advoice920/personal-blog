@@ -10,7 +10,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here';
 const verificationCodes = {};
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, rememberMe } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Username/Email and password are required' });
   }
@@ -28,7 +28,8 @@ exports.login = async (req, res) => {
       return res.status(401).json({ error: '账号或密码错误' });
     }
 
-    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
+    const expiresIn = rememberMe ? '7d' : '1d';
+    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn });
     res.json({
       message: 'Login successful',
       token,
